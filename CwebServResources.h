@@ -23,7 +23,7 @@ struct body_content
 };
 struct web_app
 {
-	function<void(string, body_content, string, map<string, string>, map<string, string>)> app_;
+	function<void(long long, string, body_content, string, map<string, string>, map<string, string>, int)> app_;
 };
 struct struct_headers
 {
@@ -64,7 +64,7 @@ struct struct_connection
 	int state = 0;
 	struct_headers headers;
 	struct_body body;
-	std::pair<web_app *, int> app;
+	std::tuple<web_app *, int, bool> app;
 	bool again = false;
 	bool start = false;
 	string com_buf = "";
@@ -78,6 +78,7 @@ struct TrieNode
 	bool routend = 0;
 	int type = 0;
 	int num = 0;
+	bool close = 0;
 	web_app app;
 };
 class Trie_route
@@ -122,7 +123,7 @@ public:
 			return abs((word - 'A' + 26) % 50);
 		}
 	}
-	void insert(std::string word_, web_app in, int type, int num)
+	void insert(std::string word_, web_app in, int type, int num, bool close)
 	{
 		string word = word_.substr(1);
 		TrieNode *current = root;
@@ -141,8 +142,9 @@ public:
 		current->type = type;
 		current->num = num;
 		current->app = in;
+		current->close = close;
 	}
-	auto search(std::string word_)
+	std::tuple<web_app *, int, bool> search(std::string word_)
 	{
 		string word = word_.substr(1);
 		// cout << word << endl;
@@ -156,19 +158,19 @@ public:
 			{
 				if (layer_ + 1 == 0)
 				{
-					return make_pair(&current->app, 1);
+					return make_tuple(&current->app, 1, current->close);
 				}
 			}
 			else if (current->type == 2)
 			{
 				if (((layer_ + 1) == (current->num)))
 				{
-					return make_pair(&current->app, 2);
+					return make_tuple(&current->app, 2, current->close);
 				}
 			}
 			else if (current->type == 3)
 			{
-				return make_pair(&current->app, 3);
+				return make_tuple(&current->app, 3, current->close);
 			}
 		}
 		for (int i = 0; i < word.size(); i++)
@@ -185,29 +187,29 @@ public:
 			if(target>=0&&target<=53)
 				current = current->children[target];
 			else
-				return make_pair((new web_app), 404);
+				return make_tuple((new web_app), 404, 0);
 			if (current->routend && (word[i + 1] == '/' || i == word.size() - 1))
 			{
 				if (current->type == 1)
 				{
 					if (layer_ == 0)
 					{
-						return make_pair(&current->app, 1);
+						return make_tuple(&current->app, 1, current->close);
 					}
 				}
 				else if (current->type == 2)
 				{
 					if (((layer_) == (current->num)))
 					{
-						return make_pair(&current->app, 2);
+						return make_tuple(&current->app, 2, current->close);
 					}
 				}
 				else if (current->type == 3)
 				{
-					return make_pair(&current->app, 3);
+					return make_tuple(&current->app, 3, current->close);
 				}
 			}
 		}
-		return make_pair((new web_app), 404);
+		return make_tuple((new web_app), 404, 0);
 	}
 } Route;

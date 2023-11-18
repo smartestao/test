@@ -16,9 +16,9 @@ using namespace std;
 #define QUANTITY_pool 500
 #define QUANTITY_epoll 1000
 #define epoll_timeout -1
-#define WEB_APP string tail, body_content data, string method, map<string, string> headers, map<string, string> cookie
+#define WEB_APP long long sockConn, string tail, body_content data, string method, map<string, string> headers, map<string, string> cookie, int event
 //tail是url，data是请求数据，type是数据类型，raw是原始的，datas是&分割的那种数据结构的数据，下面两个vector是multiple那种的，一项是vector的一项
-//method是请求类型，headers是头cookie是解析出来的cookie
+//method是请求类型，headers是头cookie是解析出来的cookie，event为1是请求，为2是关闭
 
 std::string getThreadIdOfString(const std::thread::id &id)
 {
@@ -42,12 +42,13 @@ public:
 	//route_ 要匹配的东西
 	//app 处理函数
 	//type 1：一模一样才行 2：匹配前缀，后面必须有num项 3：匹配前缀（大概，自己试试
+	//close 关闭的是否是否再调用一遍
 	template <typename F>
-	void add_app(string route_, F &&app, int type, int num = 0)
+	void add_app(string route_, F &&app, int type, int num = 0, bool close = 0)
 	{
 		web_app adding;
 		adding.app_ = app;
-		Route.insert(route_, adding, type, num);
+		Route.insert(route_, adding, type, num, close);
 	}
 	//开启服务
 	void start()

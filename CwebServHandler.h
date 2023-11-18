@@ -14,6 +14,11 @@ using namespace std;
 void close_sock(int sockConn)
 {
 	// cout << "end" << endl;
+	cout<<std::get<2>(connection[sockConn].app)<<endl;
+	if(std::get<2>(connection[sockConn].app)==1)
+	{
+		std::get<0>(connection[sockConn].app)->app_(sockConn, connection[sockConn].headers.headers["route"], (body_content){connection[sockConn].body.big, connection[sockConn].body.file_name, connection[sockConn].body.type, connection[sockConn].body.sum, connection[sockConn].body.datas, connection[sockConn].body.multipart_form_data_content.headers, &connection[sockConn].body.multipart_form_data_content.content}, connection[sockConn].type, connection[sockConn].headers.headers, connection[sockConn].headers.cookie, 2);
+	}
 	connection[sockConn] = empty_struct_connection;
 	epoll_ctl(epollfd, EPOLL_CTL_DEL, sockConn, NULL);
 	errno_cheek("close sock2");
@@ -378,7 +383,7 @@ int handle_datas(int sockConn, string recvBuf)
 	}
 	return 1;
 }
-std::pair<web_app *, int> handle_route(int sockConn)
+std::tuple<web_app *, int, bool> handle_route(int sockConn)
 {
 	string link = connection[sockConn].headers.headers["route"];
 	bool flag = 0;
@@ -394,7 +399,7 @@ std::pair<web_app *, int> handle_route(int sockConn)
 		}
 		ConnList[std::this_thread::get_id()] = sockConn;
 		return_redirect(connection[sockConn].headers.headers["route"].substr(0, len));
-		return make_pair(nullptr, 302);
+		return make_tuple(nullptr, 302, 0);
 	}
 	else
 	{
@@ -463,12 +468,12 @@ void handle_handle(sockaddr_in addrClient, int sockConn) //, unique_lock con_loc
 			if (connection[sockConn].state != 0)
 			{
 				connection[sockConn].app = handle_route(sockConn);
-				if(connection[sockConn].app.second==302)
+				if(std::get<1>(connection[sockConn].app)==302)
 				{
 					close_sock(sockConn);
 					return;
 				}
-				if (connection[sockConn].app.second == 404 || connection[sockConn].app.second == -1)
+				if(std::get<1>(connection[sockConn].app) == 404 || std::get<1>(connection[sockConn].app) == -1)
 				{
 					ConnList[std::this_thread::get_id()] = sockConn;
 					return_template("404.html", cws_empty_map, "", "404 Not Found");
@@ -489,7 +494,7 @@ void handle_handle(sockaddr_in addrClient, int sockConn) //, unique_lock con_loc
 		if (connection[sockConn].state == 2)
 		{
 			ConnList[std::this_thread::get_id()] = sockConn;
-            connection[sockConn].app.first->app_(connection[sockConn].headers.headers["route"], (body_content){connection[sockConn].body.big, connection[sockConn].body.file_name, connection[sockConn].body.type, connection[sockConn].body.sum, connection[sockConn].body.datas, connection[sockConn].body.multipart_form_data_content.headers, &connection[sockConn].body.multipart_form_data_content.content}, connection[sockConn].type, connection[sockConn].headers.headers, connection[sockConn].headers.cookie);
+            std::get<0>(connection[sockConn].app)->app_(sockConn, connection[sockConn].headers.headers["route"], (body_content){connection[sockConn].body.big, connection[sockConn].body.file_name, connection[sockConn].body.type, connection[sockConn].body.sum, connection[sockConn].body.datas, connection[sockConn].body.multipart_form_data_content.headers, &connection[sockConn].body.multipart_form_data_content.content}, connection[sockConn].type, connection[sockConn].headers.headers, connection[sockConn].headers.cookie, 1);
 			// sss.lock();
 			if (connection[sockConn].headers.headers.count("Connection") != 0)
 			{
