@@ -56,6 +56,12 @@ struct struct_body
 		bool begin=true;
 	} multipart_form_data_content;
 };
+struct struct_socket
+{
+	bool socket = false;
+	bool websocket = false;
+	web_app app;
+};
 struct struct_connection
 {
 	sockaddr_in addrClient;
@@ -68,6 +74,7 @@ struct struct_connection
 	bool again = false;
 	bool start = false;
 	string com_buf = "";
+	struct_socket socket;
 };
 struct_connection empty_struct_connection;
 struct_connection connection[150000];

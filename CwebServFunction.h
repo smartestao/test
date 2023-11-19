@@ -298,3 +298,13 @@ CWS_string query_session(map<CWS_string, CWS_string> cookie, CWS_string name)
 	}
 	return "none";
 }
+
+template <typename F>
+bool set_socket(bool state, bool websocket, F &&app)
+{
+	int sockConn = ConnList[std::this_thread::get_id()];
+	connection[sockConn].socket.socket=state;
+	connection[sockConn].socket.websocket=websocket;
+	connection[sockConn].socket.app.app_=app;
+	return true;
+}

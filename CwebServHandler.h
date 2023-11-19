@@ -448,6 +448,18 @@ void handle_handle(sockaddr_in addrClient, int sockConn) //, unique_lock con_loc
 			}
 			return;
 		}
+		if(connection[sockConn].socket.socket == true)
+		{
+			connection[sockConn].state = 3;
+			if(connection[sockConn].socket.websocket)
+			{
+				;
+			}
+			else
+			{
+				connection[sockConn].socket.app.app_(connection[sockConn].headers.headers["route"], (body_content){connection[sockConn].body.big, connection[sockConn].body.file_name, connection[sockConn].body.type, connection[sockConn].body.sum, connection[sockConn].body.datas, connection[sockConn].body.multipart_form_data_content.headers, &connection[sockConn].body.multipart_form_data_content.content}, connection[sockConn].type, connection[sockConn].headers.headers, connection[sockConn].headers.cookie);
+			}
+		}
 		if (connection[sockConn].state == 0)
 		{
 			long long pos = handle_headers(sockConn, buf);
@@ -491,22 +503,25 @@ void handle_handle(sockaddr_in addrClient, int sockConn) //, unique_lock con_loc
 			ConnList[std::this_thread::get_id()] = sockConn;
             connection[sockConn].app.first->app_(connection[sockConn].headers.headers["route"], (body_content){connection[sockConn].body.big, connection[sockConn].body.file_name, connection[sockConn].body.type, connection[sockConn].body.sum, connection[sockConn].body.datas, connection[sockConn].body.multipart_form_data_content.headers, &connection[sockConn].body.multipart_form_data_content.content}, connection[sockConn].type, connection[sockConn].headers.headers, connection[sockConn].headers.cookie);
 			// sss.lock();
-			if (connection[sockConn].headers.headers.count("Connection") != 0)
+			if(connection[sockConn].socket.socket == false)
 			{
-				if (connection[sockConn].headers.headers["Connection"] != "keep-alive")
+				if (connection[sockConn].headers.headers.count("Connection") != 0)
+				{
+					if (connection[sockConn].headers.headers["Connection"] != "keep-alive")
+					{
+						// sss.unlock();
+						close_sock(sockConn);
+						return;
+					}
+				}
+				else
 				{
 					// sss.unlock();
 					close_sock(sockConn);
 					return;
 				}
+				connection_clear(sockConn);
 			}
-			else
-			{
-				// sss.unlock();
-				close_sock(sockConn);
-				return;
-			}
-			connection_clear(sockConn);
 		}
 		errno_cheek("hh3");
 	}
