@@ -25,6 +25,10 @@ struct web_app
 {
 	function<void(string, body_content, string, map<string, string>, map<string, string>)> app_;
 };
+struct socket_app
+{
+	function<void(string, string, map<string, string>, map<string, string>, int)> app_;
+};
 struct struct_headers
 {
 	map<string, string> headers = empty_map;
@@ -60,7 +64,7 @@ struct struct_socket
 {
 	bool socket = false;
 	bool websocket = false;
-	web_app app;
+	socket_app app;
 };
 struct struct_connection
 {

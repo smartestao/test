@@ -1,9 +1,13 @@
 #include <bits/stdc++.h>
 #include "cws.h"
 using namespace std;
+void cd(SOCKET_APP)
+{
+	;
+}
 void cc(WEB_APP)
 {
-	set_socket(1,0,cc);
+	set_socket(1,0,cd);
 }
 signed main()
 {

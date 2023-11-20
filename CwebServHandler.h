@@ -14,6 +14,17 @@ using namespace std;
 void close_sock(int sockConn)
 {
 	// cout << "end" << endl;
+	if(connection[sockConn].socket.socket == true)
+	{
+		if(connection[sockConn].socket.websocket == true)
+		{
+			;
+		}
+		else
+		{
+			connection[sockConn].socket.app.app_(connection[sockConn].headers.headers["route"], "", connection[sockConn].headers.headers, connection[sockConn].headers.cookie, 2);
+		}
+	}
 	connection[sockConn] = empty_struct_connection;
 	epoll_ctl(epollfd, EPOLL_CTL_DEL, sockConn, NULL);
 	errno_cheek("close sock2");
@@ -427,7 +438,6 @@ void handle_handle(sockaddr_in addrClient, int sockConn) //, unique_lock con_loc
 			errno=0;
 		}
 		string buf(recvBuf, max(recv_len,(long long)0));
-		connection[sockConn].com_buf+=buf;
 		if (-1 == recv_len)
 		{
 			// cout<<"ooo"<<endl;
@@ -457,8 +467,12 @@ void handle_handle(sockaddr_in addrClient, int sockConn) //, unique_lock con_loc
 			}
 			else
 			{
-				connection[sockConn].socket.app.app_(connection[sockConn].headers.headers["route"], (body_content){connection[sockConn].body.big, connection[sockConn].body.file_name, connection[sockConn].body.type, connection[sockConn].body.sum, connection[sockConn].body.datas, connection[sockConn].body.multipart_form_data_content.headers, &connection[sockConn].body.multipart_form_data_content.content}, connection[sockConn].type, connection[sockConn].headers.headers, connection[sockConn].headers.cookie);
+				connection[sockConn].socket.app.app_(connection[sockConn].headers.headers["route"], buf, connection[sockConn].headers.headers, connection[sockConn].headers.cookie, 1);
 			}
+		}
+		else
+		{
+			connection[sockConn].com_buf+=buf;
 		}
 		if (connection[sockConn].state == 0)
 		{

@@ -17,6 +17,7 @@ using namespace std;
 #define QUANTITY_epoll 1000
 #define epoll_timeout -1
 #define WEB_APP string tail, body_content data, string method, map<string, string> headers, map<string, string> cookie
+#define SOCKET_APP string tail, string message, map<string, string> headers, map<string, string> cookie, int event
 //tail是url，data是请求数据，type是数据类型，raw是原始的，datas是&分割的那种数据结构的数据，下面两个vector是multiple那种的，一项是vector的一项
 //method是请求类型，headers是头cookie是解析出来的cookie
 
