@@ -23,11 +23,11 @@ struct body_content
 };
 struct web_app
 {
-	function<void(string, body_content, string, map<string, string>, map<string, string>)> app_;
+	function<void(int, string, body_content, string, map<string, string>, map<string, string>)> app_;
 };
 struct socket_app
 {
-	function<void(string, string, map<string, string>, map<string, string>, int)> app_;
+	function<void(int, string, string, map<string, string>, map<string, string>, int)> app_;
 };
 struct struct_headers
 {

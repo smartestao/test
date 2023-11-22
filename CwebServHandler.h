@@ -22,7 +22,7 @@ void close_sock(int sockConn)
 		}
 		else
 		{
-			connection[sockConn].socket.app.app_(connection[sockConn].headers.headers["route"], "", connection[sockConn].headers.headers, connection[sockConn].headers.cookie, 2);
+			connection[sockConn].socket.app.app_(sockConn, connection[sockConn].headers.headers["route"], "", connection[sockConn].headers.headers, connection[sockConn].headers.cookie, 2);
 		}
 	}
 	connection[sockConn] = empty_struct_connection;
@@ -467,7 +467,7 @@ void handle_handle(sockaddr_in addrClient, int sockConn) //, unique_lock con_loc
 			}
 			else
 			{
-				connection[sockConn].socket.app.app_(connection[sockConn].headers.headers["route"], buf, connection[sockConn].headers.headers, connection[sockConn].headers.cookie, 1);
+				connection[sockConn].socket.app.app_(sockConn, connection[sockConn].headers.headers["route"], buf, connection[sockConn].headers.headers, connection[sockConn].headers.cookie, 1);
 			}
 		}
 		else
@@ -515,7 +515,7 @@ void handle_handle(sockaddr_in addrClient, int sockConn) //, unique_lock con_loc
 		if (connection[sockConn].state == 2)
 		{
 			ConnList[std::this_thread::get_id()] = sockConn;
-            connection[sockConn].app.first->app_(connection[sockConn].headers.headers["route"], (body_content){connection[sockConn].body.big, connection[sockConn].body.file_name, connection[sockConn].body.type, connection[sockConn].body.sum, connection[sockConn].body.datas, connection[sockConn].body.multipart_form_data_content.headers, &connection[sockConn].body.multipart_form_data_content.content}, connection[sockConn].type, connection[sockConn].headers.headers, connection[sockConn].headers.cookie);
+            connection[sockConn].app.first->app_(sockConn, connection[sockConn].headers.headers["route"], (body_content){connection[sockConn].body.big, connection[sockConn].body.file_name, connection[sockConn].body.type, connection[sockConn].body.sum, connection[sockConn].body.datas, connection[sockConn].body.multipart_form_data_content.headers, &connection[sockConn].body.multipart_form_data_content.content}, connection[sockConn].type, connection[sockConn].headers.headers, connection[sockConn].headers.cookie);
 			// sss.lock();
 			if(connection[sockConn].socket.socket == false)
 			{
@@ -535,6 +535,18 @@ void handle_handle(sockaddr_in addrClient, int sockConn) //, unique_lock con_loc
 					return;
 				}
 				connection_clear(sockConn);
+			}
+			if(connection[sockConn].socket.socket == true && connection[sockConn].content.length()>0)
+			{
+				connection[sockConn].state = 3;
+				if(connection[sockConn].socket.websocket)
+				{
+					;
+				}
+				else
+				{
+					connection[sockConn].socket.app.app_(sockConn, connection[sockConn].headers.headers["route"], connection[sockConn].content, connection[sockConn].headers.headers, connection[sockConn].headers.cookie, 1);
+				}
 			}
 		}
 		errno_cheek("hh3");
