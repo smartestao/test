@@ -12,6 +12,11 @@ void cd(SOCKET_APP)
 	{
 		mt[cc].lock();
 		room[cc].erase(sockConn);
+		int si=room[cc].size();
+		for(auto i=room[cc].begin(); i!= room[cc].end(); i++)
+		{
+			return_string(*i, "l"+to_string(si));
+		}
 		mt[cc].unlock();
 		return;
 	}
@@ -34,10 +39,15 @@ void cc(WEB_APP)
 			set_socket(1,0,cd);
 			int cc=atoi(headers["code"].c_str());
 			mt[cc].lock();
-			room[cc].insert(sockConn);
 			code[sockConn]=cc;
+			int si=room[cc].size()+1;
+			for(auto i=room[cc].begin(); i!= room[cc].end(); i++)
+			{
+				return_string(*i, "l"+to_string(si));
+			}
+			room[cc].insert(sockConn);
 			mt[cc].unlock();
-			return_string(sockConn, "a");
+			return_string(sockConn, "a"+to_string(si));
 			return;
 		}
 	}
