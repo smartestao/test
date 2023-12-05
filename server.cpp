@@ -57,7 +57,12 @@ void cc(WEB_APP)
 }
 void get_v(WEB_APP)
 {
-	return_template_string(version);
+	if(asfl.try_lock_shared())
+	{
+		return_template_string(version);
+		asfl.unlock_shared();
+	}
+	return_template_string("updating...");
 }
 void get_x(WEB_APP)
 {
