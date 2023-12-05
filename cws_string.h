@@ -465,7 +465,7 @@ bool CWS_string::select_resource_file(CWS_string file_name)
     while (len >= sizeof(buf))
     {
         len = fread(buf, 1, sizeof(buf), original_file);
-        this->operator+=(string(buf).substr(0, len));
+        this->operator+=(string(buf, len));
     }
     fclose(original_file);
     return true;
