@@ -77,8 +77,6 @@ CWS_file::CWS_file(int method, CWS_string file_name, int mode)
     if (method == 2)
     {
         file = fopen(file_name.to_string().c_str(), "w+");
-        fclose(file);
-        file = fopen(file_name.to_string().c_str(), "r+");
     }
     if (mode == 1)
     {

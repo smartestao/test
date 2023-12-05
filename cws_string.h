@@ -140,7 +140,7 @@ CWS_string::CWS_string(const CWS_string &str, long long max_str_len)
             {
                 char val[5000];
                 fread(val, std::min((long long)sizeof(val), file_len), 1, str.file);
-                cws_string += std::string(val).substr(0, std::min((long long)sizeof(val), file_len));
+                cws_string += std::string(val, std::min((long long)sizeof(val), file_len));
                 file_len -= 5000;
             }
         }
@@ -206,7 +206,7 @@ CWS_string &CWS_string::operator=(CWS_string str)
             {
                 char val[5000];
                 fread(val, std::min((long long)sizeof(val), file_len), 1, str.file);
-                cws_string += std::string(val).substr(0, std::min((long long)sizeof(val), file_len));
+                cws_string += std::string(val, std::min((long long)sizeof(val), file_len));
                 file_len -= 5000;
             }
         }
@@ -235,7 +235,7 @@ CWS_string &CWS_string::operator=(CWS_string str)
         {
             char val[5000];
             fread(val, std::min((long long)sizeof(val), len), 1, str.file);
-            fwrite(std::string(val).substr(0, std::min((long long)sizeof(val), len)).c_str(), std::min((long long)sizeof(val), len), 1, file);
+            fwrite(std::string(val, std::min((long long)sizeof(val), len)).c_str(), std::min((long long)sizeof(val), len), 1, file);
             len -= 5000;
         }
     }
@@ -287,7 +287,7 @@ std::string CWS_string::to_string(long long pos, long long len)
             {
                 char str[5000];
                 fread(str, std::min((long long)sizeof(str), len), 1, file);
-                result += std::string(str).substr(0, std::min((long long)sizeof(str), len));
+                result += std::string(str, std::min((long long)sizeof(str), len));
                 len -= 5000;
             }
             return result;
@@ -299,7 +299,7 @@ std::string CWS_string::to_string(long long pos, long long len)
     {
         char str[5000];
         fread(str, std::min((long long)sizeof(str), len), 1, file);
-        result += std::string(str).substr(0, std::min((long long)sizeof(str), len));
+        result += std::string(str, std::min((long long)sizeof(str), len));
         len -= 5000;
     }
     return result;
@@ -432,7 +432,7 @@ CWS_string CWS_string::substr(long long pos, long long len)
     {
         char str[5000];
         fread(str, std::min((long long)sizeof(str), len), 1, file);
-        result += std::string(str).substr(0, std::min((long long)sizeof(str), len));
+        result += std::string(str, std::min((long long)sizeof(str), len));
         len -= 5000;
     }
     return result;
