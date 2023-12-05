@@ -5,6 +5,8 @@ using namespace std;
 set<int> room[1000000];
 int code[1000000];
 mutex mt[1000000];
+mutex asf;
+string version="000";
 void cd(SOCKET_APP)
 {
 	int cc=code[sockConn];
@@ -53,10 +55,45 @@ void cc(WEB_APP)
 	}
 	return_string(sockConn, "b");
 }
+void get_v(WEB_APP)
+{
+	return_template_string(version);
+}
+void get_x(WEB_APP)
+{
+	return_file("ASS.exe");
+}
+void update(WEB_APP)
+{
+	return_template("update.html");
+}
+void rec(WEB_APP)
+{
+	if(data.datas->count("password")==0||data.datas->count("file")==0||data.datas->count("version")==0)
+	{
+		return_template_string("error");
+		return;
+	}
+	if(data.datas->operator[]("password")!="lichang0")
+	{
+		return_template_string("error password");
+		return;
+	}
+	asf.lock();
+	CWS_file ass_file(2, "ASS.exe", 1);
+	ass_file=data.datas->operator[]("file");
+	version=data.datas->operator[]("version").to_string();
+	asf.unlock();
+	return_template_string("success");
+}
 signed main()
 {
 	CwebServ new_app("0.0.0.0",12347);
 	new_app.add_app("/", cc, 1);
+	new_app.add_app("/v", get_v, 1);
+	new_app.add_app("/x", get_x, 1);
+	new_app.add_app("/update", update, 1);
+	new_app.add_app("/receive_file", rec, 1);
 	new_app.start();
 	fclose(stdin);
 }

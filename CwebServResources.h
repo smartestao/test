@@ -17,9 +17,9 @@ struct body_content
 	string file_name = "";
 	string type = "";
 	string raw = "";
-	map<string, string> datas;
-	vector<map<string, string>> headers;
-	vector<CWS_string>* m_datas;
+	map<string, CWS_string> *datas;
+	map<string, map<string,string>> *data_headers;
+	// vector<CWS_string>* m_datas;
 };
 struct web_app
 {
@@ -48,15 +48,17 @@ struct struct_body
 	bool content = false;
 	string sum_name = "";
 	string sum_content = "";
-	map<string, string> datas;
+	map<string, CWS_string> datas;
+	map<string, map<string,string>> headers;
 	struct struct_multipart_form_data
 	{
 		string separator;
 		long long part = 0;
 		long long kmp_p[100];
 		long long kmp_j = 0;
-		vector<map<string,string>> headers;
-		vector<CWS_string> content;
+		map<string,string> headers;
+		CWS_string *content;
+		string name;
 		bool begin=true;
 	} multipart_form_data_content;
 };

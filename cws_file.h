@@ -74,6 +74,10 @@ CWS_file::CWS_file(int method, CWS_string file_name, int mode)
     {
         file = fopen(file_name.to_string().c_str(), "r+");
     }
+    if (method == 2)
+    {
+        file = fopen(file_name.to_string().c_str(), "w+");
+    }
     if (mode == 1)
     {
         fseek(file, 0, SEEK_END);

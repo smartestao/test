@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>ass更新管理</title>
+        <script src="http://code.jquery.com/jquery-1.6.min.js"></script>
+    </head>
+    <body>
+        <form id="file_form">
+            版本号:<input type="text" id="version" name="version">
+            <br />
+            选择文件:<input type="file" id="file" name="file">
+            <br />
+            密码:<input type="password" id="password" name="password">
+            <br />
+            <p id="jd" style="display:none"></p>
+        </form>
+        <button type="button" onclick="submit()">提交</button>
+        <br />
+        <iframe src="/v"></iframe>
+        <script>
+            function submit() {
+                var file = document.getElementById('file').files[0];
+                var formData = new FormData($("#file_form")[0]);
+                if (!file) {
+                    alert("未选择文件");
+                    return;
+                }
+                $('#jd').show();
+                $.ajax({
+                    type: "POST",
+                    data: formData,
+                    url: "/receive_file",
+                    contentType: false,
+                    processData: false,
+                    success: function (data) {
+                        alert(data);
+                        window.location.reload();
+                    },
+                    xhr: function () {
+                        var xhr = $.ajaxSettings.xhr();
+                        xhr.upload.addEventListener("progress", function (evt) {
+                            if (evt.lengthComputable) {
+                                var percentComplete = "进度:" + evt.loaded / evt.total * 100 + "%";
+                                if (percentComplete == "进度:100%") {
+                                    percentComplete = "处理中";
+                                }
+                                $('#jd').text(percentComplete);
+                            }
+                        }, false);
+                        return xhr;
+                    },
+                });
+            }
+        </script>
+    </body>
+</html>

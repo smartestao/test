@@ -221,8 +221,8 @@ int handle_body_headers(int sockConn, string Buf)
 	long long length = Buf.length();
 	if (connection[sockConn].body.multipart_form_data_content.begin)
 	{
-		connection[sockConn].body.multipart_form_data_content.content.push_back("");
-		connection[sockConn].body.multipart_form_data_content.headers.push_back(empty_map);
+		// connection[sockConn].body.multipart_form_data_content.content.push_back("");
+		connection[sockConn].body.multipart_form_data_content.headers.clear();
 		connection[sockConn].body.multipart_form_data_content.begin=false;
 	}
 	for (int i = 0; i < length; i++)
@@ -243,7 +243,7 @@ int handle_body_headers(int sockConn, string Buf)
 					break;
 				}
 			}
-			connection[sockConn].body.multipart_form_data_content.headers[connection[sockConn].body.multipart_form_data_content.headers.size() - 1][connection[sockConn].body.sum.substr(0, connection[sockConn].body.sum.find(":"))] = header_data;
+			connection[sockConn].body.multipart_form_data_content.headers[connection[sockConn].body.sum.substr(0, connection[sockConn].body.sum.find(":"))] = header_data;
 			connection[sockConn].body.sum = "";
 		}
 		else if (Buf[i] != '\r')
@@ -331,6 +331,23 @@ int handle_datas(int sockConn, string recvBuf)
 				headers_result = handle_body_headers(sockConn, Buf.to_string(pos, sum_length));
 				if(headers_result!=-1)
 				{
+					if(connection[sockConn].body.multipart_form_data_content.headers.count("Content-Disposition")!=0)
+					{
+						string hc=connection[sockConn].body.multipart_form_data_content.headers["Content-Disposition"];
+						int name_pos=hc.find("name=");
+						name_pos=hc.find("\"",name_pos+5)+1;
+						int name_end_pos=hc.find("\"", name_pos);
+						string name=hc.substr(name_pos, name_end_pos-name_pos);
+						connection[sockConn].body.datas[name]="";
+						connection[sockConn].body.headers[name]=connection[sockConn].body.multipart_form_data_content.headers;
+						connection[sockConn].body.multipart_form_data_content.content=&connection[sockConn].body.datas[name];
+					}
+					else
+					{
+						connection[sockConn].body.datas["empty"]="";
+						connection[sockConn].body.headers["empty"]=connection[sockConn].body.multipart_form_data_content.headers;
+						connection[sockConn].body.multipart_form_data_content.content=&connection[sockConn].body.datas["empty"];
+					}
 					connection[sockConn].body.multipart_form_data_content.part=2;
 					pos+=headers_result+1;
 				}
@@ -354,16 +371,16 @@ int handle_datas(int sockConn, string recvBuf)
 				if (kmp_result != -1)
 				{
 					// cout<<"sep "<<sep_length<<endl;
-					connection[sockConn].body.multipart_form_data_content.content[connection[sockConn].body.multipart_form_data_content.content.size()-1]+=Buf.substr(pos,kmp_result-4);
+					connection[sockConn].body.multipart_form_data_content.content->operator+=(Buf.substr(pos,kmp_result-4));
 					pos+=kmp_result+sep_length;
 					connection[sockConn].body.multipart_form_data_content.part = 1;
 					if(pos+1>=sum_length) break;
 					if(Buf[pos]=='-' && Buf[pos+1]=='-') break;
-					pos+=2;
+					pos+=1;
 				}
 				else
 				{
-					connection[sockConn].body.multipart_form_data_content.content[connection[sockConn].body.multipart_form_data_content.content.size()-1]+=Buf.substr(pos,sum_length-pos);
+					connection[sockConn].body.multipart_form_data_content.content->operator+=(Buf.substr(pos,sum_length-pos));
 					pos=sum_length;
 				}
 			}
@@ -515,7 +532,7 @@ void handle_handle(sockaddr_in addrClient, int sockConn) //, unique_lock con_loc
 		if (connection[sockConn].state == 2)
 		{
 			ConnList[std::this_thread::get_id()] = sockConn;
-            connection[sockConn].app.first->app_(sockConn, connection[sockConn].headers.headers["route"], (body_content){connection[sockConn].body.big, connection[sockConn].body.file_name, connection[sockConn].body.type, connection[sockConn].body.sum, connection[sockConn].body.datas, connection[sockConn].body.multipart_form_data_content.headers, &connection[sockConn].body.multipart_form_data_content.content}, connection[sockConn].type, connection[sockConn].headers.headers, connection[sockConn].headers.cookie);
+            connection[sockConn].app.first->app_(sockConn, connection[sockConn].headers.headers["route"], (body_content){connection[sockConn].body.big, connection[sockConn].body.file_name, connection[sockConn].body.type, connection[sockConn].body.sum, &connection[sockConn].body.datas, &connection[sockConn].body.headers}, connection[sockConn].type, connection[sockConn].headers.headers, connection[sockConn].headers.cookie);
 			// sss.lock();
 			if(connection[sockConn].socket.socket == false)
 			{
