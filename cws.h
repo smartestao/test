@@ -92,7 +92,7 @@ public:
 		cout << "start listening..." << endl;
 		response_headers["type"] = "HTTP/1.1";
 		response_headers["code"] = "200 OK";
-		response_headers["content-type"] = "text/html; charset=utf-8";
+		response_headers["Content-Type"] = "text/html; charset=utf-8";
 		while (1)
 		{
 			int epoll_ret = epoll_wait(epollfd, epoll_event_list, QUANTITY_epoll, epoll_timeout);

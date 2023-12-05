@@ -5,7 +5,7 @@ using namespace std;
 set<int> room[1000000];
 int code[1000000];
 mutex mt[1000000];
-mutex asf;
+shared_timed_mutex asfl;
 string version="000";
 void cd(SOCKET_APP)
 {
@@ -61,7 +61,12 @@ void get_v(WEB_APP)
 }
 void get_x(WEB_APP)
 {
-	return_file("ASS.exe");
+	if(asfl.try_lock_shared())
+	{
+		return_file("ASS.exe");
+		asfl.unlock_shared();
+	}
+	return_template_string("t");
 }
 void update(WEB_APP)
 {
@@ -79,12 +84,14 @@ void rec(WEB_APP)
 		return_template_string("error password");
 		return;
 	}
-	asf.lock();
+	map<CWS_string, CWS_string> hh;
+	hh["Connection"]="close";
+	return_template_string("已成功接收，稍后将完成更新", hh);
+	asfl.lock();
 	CWS_file ass_file(2, "ASS.exe", 1);
 	ass_file=data.datas->operator[]("file");
 	version=data.datas->operator[]("version").to_string();
-	asf.unlock();
-	return_template_string("success");
+	asfl.unlock();
 }
 signed main()
 {
