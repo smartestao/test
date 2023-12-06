@@ -1,12 +1,14 @@
 #include <bits/stdc++.h>
 #include "cws.h"
 #include <mutex>
+#include <atomic>
 using namespace std;
 set<int> room[1000000];
 int code[1000000];
 mutex mt[1000000];
-shared_timed_mutex asfl;
+shared_mutex asfl;
 string version="000";
+atomic<int> xs(0);
 void cd(SOCKET_APP)
 {
 	int cc=code[sockConn];
@@ -57,19 +59,27 @@ void cc(WEB_APP)
 }
 void get_v(WEB_APP)
 {
-	if(asfl.try_lock_shared())
+	if(xs.load()==0)
 	{
-		return_template_string(version);
-		asfl.unlock_shared();
+		if(asfl.try_lock_shared())
+		{
+			return_template_string(version);
+			asfl.unlock_shared();
+			return;
+		}
 	}
 	return_template_string("updating...");
 }
 void get_x(WEB_APP)
 {
-	if(asfl.try_lock_shared())
+	if(xs.load()==0)
 	{
-		return_file("ASS.exe");
-		asfl.unlock_shared();
+		if(asfl.try_lock_shared())
+		{
+			return_file("ASS.exe");
+			asfl.unlock_shared();
+			return;
+		}
 	}
 	return_template_string("t");
 }
@@ -91,12 +101,19 @@ void rec(WEB_APP)
 	}
 	map<CWS_string, CWS_string> hh;
 	hh["Connection"]="close";
+	if(xs++!=0)
+	{
+		xs--;
+		return_template_string("存在尚未完成的更新任务，请稍后重试", hh);
+		return;
+	}
 	return_template_string("已成功接收，稍后将完成更新", hh);
 	asfl.lock();
 	CWS_file ass_file(2, "ASS.exe", 1);
 	ass_file=data.datas->operator[]("file");
 	version=data.datas->operator[]("version").to_string();
 	asfl.unlock();
+	xs--;
 }
 signed main()
 {
